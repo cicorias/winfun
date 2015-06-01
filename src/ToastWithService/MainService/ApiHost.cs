@@ -8,21 +8,58 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Owin;
+using System.Diagnostics;
+using System.IO;
+using System.Threading;
+using System.Configuration;
 
 namespace HelloService
 {
 
     public class ApiHost
     {
-        string baseUri = "http://localhost:9000/";
-        public void Run()
+        bool _isRunning = true;
+        IDisposable _server = null;
+        int _port = 9000;
+        string _baseUri;
+
+        public bool IsRunning
         {
-            // Start OWIN host 
-            using (WebApp.Start<Startup>(url: baseUri))
+            get { return _isRunning; }
+            set { _isRunning = value; }
+        }
+
+        public ApiHost()
+        {
+            try
             {
-                Console.WriteLine("Server running at {0} - press Enter to quit. ", baseUri);
-                Console.ReadLine();
+                var port = ConfigurationManager.AppSettings["apihost:port"];
+                int.TryParse(port, out _port);
+                _baseUri = string.Format("http://localhost:{0}/", _port);
             }
+            catch { }
+        }
+
+        public IDisposable Run(bool interactive = false)
+        {
+            if (!interactive)
+            {
+                _server = WebApp.Start<Startup>(url: _baseUri);
+            }
+            else
+            {
+                // Start OWIN host 
+                using (WebApp.Start<Startup>(url: _baseUri))
+                {
+                    while (_isRunning)
+                    {
+                        Debug.WriteLine("Server running at {0} - press Enter to quit. ", _baseUri);
+                        Console.WriteLine("Server running at {0} - press Enter to quit. ", _baseUri);
+                        Console.ReadLine();
+                    }
+                }
+            }
+            return _server;
         }
     }
 

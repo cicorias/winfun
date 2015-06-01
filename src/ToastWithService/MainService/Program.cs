@@ -15,10 +15,6 @@ namespace HelloService
     class Program
     {
 
-        const string APP_ID = "Microsoft.Samples.DesktopToastsSample";
-        const string APP_SHORTCUT = "\\Microsoft\\Windows\\Start Menu\\Programs\\Desktop Toasts Sample CS.lnk";
-
-
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -50,6 +46,7 @@ namespace HelloService
                 {
                     case "1":
                         Console.WriteLine("Starting Service");
+                        service.Interactive = true;
                         service.Start(args);
                         Console.WriteLine("Service Start Returned - Press Enter To Exit");
                         Console.ReadLine();
@@ -87,8 +84,7 @@ namespace HelloService
         private bool TryCreateShortcut()
         {
             string shortcutPath = Environment.GetFolderPath(
-                Environment.SpecialFolder.ApplicationData) + 
-                "\\Microsoft\\Windows\\Start Menu\\Programs\\Desktop Toasts Sample CS.lnk";
+                Environment.SpecialFolder.ApplicationData) + Constants.APP_SHORTCUT;
             
             if (!File.Exists(shortcutPath))
             {
@@ -103,8 +99,7 @@ namespace HelloService
         private bool TryRemoveShortcut()
         {
             string shortcutPath = Environment.GetFolderPath(
-                Environment.SpecialFolder.ApplicationData) +
-                "\\Microsoft\\Windows\\Start Menu\\Programs\\Desktop Toasts Sample CS.lnk";
+                Environment.SpecialFolder.ApplicationData) + Constants.APP_SHORTCUT;
 
             if (File.Exists(shortcutPath))
             {
@@ -138,7 +133,7 @@ namespace HelloService
             // Open the shortcut property store, set the AppUserModelId property
             IPropertyStore newShortcutProperties = (IPropertyStore)newShortcut;
 
-            using (PropVariant appId = new PropVariant(APP_ID))
+            using (PropVariant appId = new PropVariant(Constants.APP_ID))
             {
                 DesktopToastsSample.ShellHelpers.ErrorHelper.VerifySucceeded(
                     newShortcutProperties.SetValue(SystemProperties.System.AppUserModel.ID, appId));
